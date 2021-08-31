@@ -49,4 +49,4 @@ npx hardhat run scripts/deploy.js --network kovan
 
 ## Deployed Contract Address
 
-Coming Soon!
+Coming Soon.
