@@ -7,309 +7,40 @@
     const signer = new ethers.providers.Web3Provider(web3Provider).getSigner();
 
     // Ethereum mainnet Config
-    const oracleAddress = "0x34BAf46eA5081e3E49c29fccd8671ccc51e61E79";
-    // NOTICE: This value is only used to calculate APY to set, not in the interest rate contract,
-    // so, in different network, should re-write this value in the contract manually.
-    let blocksPerYear = 2425847;
-
-    // TODO:
-    const proxyAdminAddress = "0xbC7cE803Bd8569E6b3cB07869419DFc787464950";
-    const pauseGuardianAddress = "0x2929F07fF145a21b6784fE923b24F3ED38C3a5c3";
-    let controllerImplAddress = "0xD5b837a41A0d664ec28aA55B69B352944F741EFa";
-    let controllerProxyAddress = "0x8f1f15DCf4c70873fAF1707973f6029DEc4164b3";
-    let msdControllerImplAddress = "0x5dCDafD2C16B9Ea8991af7Bf4ea0210804F95338";
-    let msdControllerProxyAddress = "0x45677a101D70E9910C418D9426bC6c5874CE2Fd7";
-    let isNewMSDController = false;
-    let rewardImplAddress = "0x61206650bb0151f8EE8C278736c59B34BE5463fB";
-    let rewardProxyAddress = "0x6d290f45A280A688Ff58d095de480364069af110";
-    let nonStableInterestModelAddress = "0x3A452823EDB97f72B497c511301fb5758f575336";
-    let stableInterestModelAddress = "0xAa272a00e0d6F763AcC8Fe6DdEdf2684A122B215";
-    let fixedInterestModelAddress = "0x22961D0Ba5150f97AE0F3248b4c415875cBf42d5";
-    let msdImplementationAddress = "0xE3ec7De9375bFc22F4481C4605431d67ED5Bd260";
-    let iTokenImplementationAddress = "0xFC47D0063de06BA21dfEBF9D6cd6e337150e390f";
-    let iETHImplementationAddress = "0x61D63b034B6b5D4F4c83a153cB9050fd5faBFDF3";
-    let iMSDImplementationAddress = "0x37972736a3CF92E00C8F59aE5E80B3733b622f9e";
-    let lendingDataImplAddress = "0x6c63ef555Db56cfa8155d1864Ea359796e123298";
-    let lendingDataProxyAddress = "0x10937c33BB015Aa52EF39E2A5CAd0Da285bb39ab";
-
-    let toDeployiTokens = ["eth", "reth", "usx_iToken"];
-    let toDeployMSDTokens = [];
-    let assetsConfig = {
-      "closeFactor": "0.5",
-      "liquidationIncentive": "1.1",
-      "reth": {
-        // iToken config
-        iTokenAddress: "0x983E0df5CCCef64fCaa54F99b0945bcCf154EE80",
-        iTokenUnderlyingAddress: "0x9559Aaa82d9649C7A7b220E7c461d2E74c9a3593",
-        iTokenName: "Liqee rETH",
-        iTokenSymbol: "qrETH",
-        reserveRatio: "0.2",
-        flashloanFeeRatio: "0.0004",
-        protocolFeeRatio: "0.3",
-        // controller config
-        collateralFactor: "0.7",
-        borrowFactor: "1",
-        supplyCapacity: "5000",
-        borrowCapacity: "0",
-        distributionFactor: "1",
-        // interest model config
-        interestModelType: "nonStableInterestModel",
-        // asset price swing
-        priceSwing: "0.1",
-      },
-      "eth": {
-        // iToken config
-        iTokenAddress: "0x9C02b8409a2CD04DFDA7b824235625f9C7DFb0E2",
-        iTokenUnderlyingAddress: "0x000000000000000000000000000000000000000000000000",
-        iTokenName: "Liqee ETH",
-        iTokenSymbol: "qETH",
-        reserveRatio: "0.2",
-        flashloanFeeRatio: "0.0004",
-        protocolFeeRatio: "0.3",
-        // controller config
-        collateralFactor: "0.8",
-        borrowFactor: "1",
-        supplyCapacity: "5000",
-        borrowCapacity: "5000",
-        distributionFactor: "1",
-        // interest model config
-        interestModelType: "nonStableInterestModel",
-        // asset price swing
-        priceSwing: "0.1",
-      },
-      "usx_imsd": {
-        // MSD cofig
-        msdAddress: "0x0a5E677a6A24b2F1A2Bf4F3bFfC443231d2fDEc8",
-        msdTokenName: "dForce USD",
-        msdTokenSymbol: "USX",
-        decimals: 18,
-        // iMToken config
-        iMTokenAddress: "0x4c3F88A792325aD51d8c446e1815DA10dA3D184c",
-        iMTokenName: "Liqee USD",
-        iMTokenSymbol: "qMUSX",
-        // controller config
-        collateralFactor: "0",
-        borrowFactor: "1",
-        supplyCapacity: "0",
-        borrowCapacity: "3000000",
-        distributionFactor: "1",
-        borrowAPY: 1.03,
-      },
-      "usx_iToken": {
-        // iToken config
-        iTokenAddress: "0xA5d65E3bD7411D409EC2CCFa30C6511bA8a99D2B",
-        iTokenUnderlyingAddress: "0x0a5E677a6A24b2F1A2Bf4F3bFfC443231d2fDEc8",
-        iTokenName: "Liqee USD",
-        iTokenSymbol: "qUSX",
-        flashloanFeeRatio: "0.0004",
-        protocolFeeRatio: "0.3",
-        reserveRatio: "0.2",
-        // controller config
-        collateralFactor: "0.8",
-        borrowFactor: "1",
-        supplyCapacity: "5000000",
-        borrowCapacity: "5000000",
-        distributionFactor: "1",
-        // interest model config
-        interestModelType: "stableInterestModelAddress",
-        // asset price swing
-        priceSwing: "0.001",
-      },
-    };
-
-    // // BSC mainnet Config
-    // const oracleAddress = "0x7DC17576200590C4d0D8d46843c41f324da2046C";
-    // let blocksPerYear = 10512000;
+    // const oracleAddress = "0x34BAf46eA5081e3E49c29fccd8671ccc51e61E79";
+    // // NOTICE: This value is only used to calculate APY to set, not in the interest rate contract,
+    // // so, in different network, should re-write this value in the contract manually.
+    // let blocksPerYear = 2425847;
 
     // // TODO:
-    // const proxyAdminAddress = "0xD5b837a41A0d664ec28aA55B69B352944F741EFa";
+    // const proxyAdminAddress = "0xbC7cE803Bd8569E6b3cB07869419DFc787464950";
     // const pauseGuardianAddress = "0x2929F07fF145a21b6784fE923b24F3ED38C3a5c3";
-    // let controllerImplAddress = "0x61206650bb0151f8EE8C278736c59B34BE5463fB";
-    // let controllerProxyAddress = "0x6d290f45A280A688Ff58d095de480364069af110";
-    // let msdControllerImplAddress = "0x5b3b6ff84f6693ffc3797f4ec4b764dea1c33cfb";
-    // let msdControllerProxyAddress = "0x4601d9c8def18c101496dec0a4864e8751295bee";
+    // let controllerImplAddress = "0xD5b837a41A0d664ec28aA55B69B352944F741EFa";
+    // let controllerProxyAddress = "0x8f1f15DCf4c70873fAF1707973f6029DEc4164b3";
+    // let msdControllerImplAddress = "0x5dCDafD2C16B9Ea8991af7Bf4ea0210804F95338";
+    // let msdControllerProxyAddress = "0x45677a101D70E9910C418D9426bC6c5874CE2Fd7";
     // let isNewMSDController = false;
-    // let rewardImplAddress = "0x19CD8bE684A995e10Eaf1e8Edba4fea14f934EaF";
-    // let rewardProxyAddress = "0xAa272a00e0d6F763AcC8Fe6DdEdf2684A122B215";
-    // let nonStableInterestModelAddress = "0xB62400Ea83d4EC9D54374394C0Cc3aa9364EbBD1";
-    // let stableInterestModelAddress = "0x61D63b034B6b5D4F4c83a153cB9050fd5faBFDF3";
-    // let fixedInterestModelAddress = "0x9FA8a0851f252E316ec89D619305553Fc28551d9";
-    // let msdImplementationAddress = "0xac2428D0FB0a8516Fc30e6a0bc19b098Be5F9DfF";
-    // let iTokenImplementationAddress = "0x255d14997E9669eA371e6079288AF9c5E5621Fc8";
-    // let iETHImplementationAddress = "0x255d14997E9669eA3............";
-    // let iMSDImplementationAddress = "0x39D3C737ee4bCcAf0264c0cf7076712505CBDc92";
-    // let lendingDataImplAddress = "0x99A1B18c3b244a4863d1d032F96B0C3d3ab9cCD8";
-    // let lendingDataProxyAddress = "0x52682dB111e56e57f7362C9A7B683B3542Ff46bA";
+    // let rewardImplAddress = "0x61206650bb0151f8EE8C278736c59B34BE5463fB";
+    // let rewardProxyAddress = "0x6d290f45A280A688Ff58d095de480364069af110";
+    // let nonStableInterestModelAddress = "0x3A452823EDB97f72B497c511301fb5758f575336";
+    // let stableInterestModelAddress = "0xAa272a00e0d6F763AcC8Fe6DdEdf2684A122B215";
+    // let fixedInterestModelAddress = "0x22961D0Ba5150f97AE0F3248b4c415875cBf42d5";
+    // let msdImplementationAddress = "0xE3ec7De9375bFc22F4481C4605431d67ED5Bd260";
+    // let iTokenImplementationAddress = "0xFC47D0063de06BA21dfEBF9D6cd6e337150e390f";
+    // let iETHImplementationAddress = "0x61D63b034B6b5D4F4c83a153cB9050fd5faBFDF3";
+    // let iMSDImplementationAddress = "0x37972736a3CF92E00C8F59aE5E80B3733b622f9e";
+    // let lendingDataImplAddress = "0x6c63ef555Db56cfa8155d1864Ea359796e123298";
+    // let lendingDataProxyAddress = "0x10937c33BB015Aa52EF39E2A5CAd0Da285bb39ab";
 
-    // let toDeployiTokens = ["atom", "ratom", "fil", "tfil", "dot", "rdot", "eth_token", "reth", "xtz", "txtz", "usx_iToken"];
-    // let toDeployMSDTokens = ["usx_imsd"];
+    // let toDeployiTokens = ["eth", "reth", "usx_iToken"];
+    // let toDeployMSDTokens = [];
     // let assetsConfig = {
     //   "closeFactor": "0.5",
     //   "liquidationIncentive": "1.1",
-    //   "atom": {
-    //     // iToken config
-    //     iTokenAddress: "0xAdCF9619C404de591766B33e696c737ebe341A87",
-    //     iTokenUnderlyingAddress: "0x0Eb3a705fc54725037CC9e008bDede697f62F335",
-    //     iTokenName: "Liqee ATOM",
-    //     iTokenSymbol: "qATOM",
-    //     reserveRatio: "0.2",
-    //     flashloanFeeRatio: "0.0004",
-    //     protocolFeeRatio: "0.3",
-    //     // controller config
-    //     collateralFactor: "0.7",
-    //     borrowFactor: "1",
-    //     supplyCapacity: "1000000",
-    //     borrowCapacity: "1000000",
-    //     distributionFactor: "1",
-    //     // interest model config
-    //     interestModelType: "nonStableInterestModel",
-    //     // asset price swing
-    //     priceSwing: "0.1",
-    //   },
-    //   "ratom": {
-    //     // iToken config
-    //     iTokenAddress: "0x4E673bed356912077c718CBAB286BC135fAA5FB6",
-    //     iTokenUnderlyingAddress: "0x1e5f6d5355AE5f1C5C687D3041c55F0aEEc57EAb",
-    //     iTokenName: "Liqee rATOM",
-    //     iTokenSymbol: "qrATOM",
-    //     reserveRatio: "0.2",
-    //     flashloanFeeRatio: "0.0004",
-    //     protocolFeeRatio: "0.3",
-    //     // controller config
-    //     collateralFactor: "0.7",
-    //     borrowFactor: "1",
-    //     supplyCapacity: "1000000",
-    //     borrowCapacity: "0",
-    //     distributionFactor: "1",
-    //     // interest model config
-    //     interestModelType: "nonStableInterestModel",
-    //     // asset price swing
-    //     priceSwing: "0.1",
-    //   },
-    //   "dot": {
-    //     // iToken config
-    //     iTokenAddress: "0xF51422c47c6C3e40CFCA4a7b04232aeDb7f49948",
-    //     iTokenUnderlyingAddress: "0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402",
-    //     iTokenName: "Liqee DOT",
-    //     iTokenSymbol: "qDOT",
-    //     reserveRatio: "0.2",
-    //     flashloanFeeRatio: "0.0004",
-    //     protocolFeeRatio: "0.3",
-    //     // controller config
-    //     collateralFactor: "0.7",
-    //     borrowFactor: "1",
-    //     supplyCapacity: "800000",
-    //     borrowCapacity: "800000",
-    //     distributionFactor: "1",
-    //     // interest model config
-    //     interestModelType: "nonStableInterestModel",
-    //     // asset price swing
-    //     priceSwing: "0.1",
-    //   },
-    //   "rdot": {
-    //     // iToken config
-    //     iTokenAddress: "0x09d0D2C90d09dD817559425479a573faA354c9d2",
-    //     iTokenUnderlyingAddress: "0x1dab2a526c8ac1ddea86838a7b968626988d33de",
-    //     iTokenName: "Liqee rDOT",
-    //     iTokenSymbol: "qrDOT",
-    //     reserveRatio: "0.2",
-    //     flashloanFeeRatio: "0.0004",
-    //     protocolFeeRatio: "0.3",
-    //     // controller config
-    //     collateralFactor: "0.7",
-    //     borrowFactor: "1",
-    //     supplyCapacity: "500000",
-    //     borrowCapacity: "0",
-    //     distributionFactor: "1",
-    //     // interest model config
-    //     interestModelType: "nonStableInterestModel",
-    //     // asset price swing
-    //     priceSwing: "0.1",
-    //   },
-    //   "fil": {
-    //     // iToken config
-    //     iTokenAddress: "0x89934cF95c8Ffa4D748B3a9963faD13dBA52C52F",
-    //     iTokenUnderlyingAddress: "0x0D8Ce2A99Bb6e3B7Db580eD848240e4a0F9aE153",
-    //     iTokenName: "Liqee FIL",
-    //     iTokenSymbol: "qFIL",
-    //     reserveRatio: "0.2",
-    //     flashloanFeeRatio: "0.0004",
-    //     protocolFeeRatio: "0.3",
-    //     // controller config
-    //     collateralFactor: "0.7",
-    //     borrowFactor: "1",
-    //     supplyCapacity: "100000",
-    //     borrowCapacity: "100000",
-    //     distributionFactor: "1",
-    //     // interest model config
-    //     interestModelType: "nonStableInterestModel",
-    //     // asset price swing
-    //     priceSwing: "0.1",
-    //   },
-    //   "tfil": {
-    //     // iToken config
-    //     iTokenAddress: "0x10937c33BB015Aa52EF39E2A5CAd0Da285bb39ab",
-    //     iTokenUnderlyingAddress: "0x7829a9810BB84b0e6827f21c81396125d76a2EAB",
-    //     iTokenName: "Liqee tFIL",
-    //     iTokenSymbol: "qtFIL",
-    //     reserveRatio: "0.2",
-    //     flashloanFeeRatio: "0.0004",
-    //     protocolFeeRatio: "0.3",
-    //     // controller config
-    //     collateralFactor: "0.75",
-    //     borrowFactor: "1",
-    //     supplyCapacity: "100000",
-    //     borrowCapacity: "0",
-    //     distributionFactor: "1",
-    //     // interest model config
-    //     interestModelType: "nonStableInterestModel",
-    //     // asset price swing
-    //     priceSwing: "0.1",
-    //   },
-    //   "xtz": {
-    //     // iToken config
-    //     iTokenAddress: "0xD95e75Bf11FF705ebD0bBc088892483015bB40fb",
-    //     iTokenUnderlyingAddress: "0x16939ef78684453bfDFb47825F8a5F714f12623a",
-    //     iTokenName: "Liqee XTZ",
-    //     iTokenSymbol: "qXTZ",
-    //     reserveRatio: "0.2",
-    //     flashloanFeeRatio: "0.0004",
-    //     protocolFeeRatio: "0.3",
-    //     // controller config
-    //     collateralFactor: "0.7",
-    //     borrowFactor: "1",
-    //     supplyCapacity: "500000",
-    //     borrowCapacity: "500000",
-    //     distributionFactor: "1",
-    //     // interest model config
-    //     interestModelType: "nonStableInterestModel",
-    //     // asset price swing
-    //     priceSwing: "0.1",
-    //   },
-    //   "txtz": {
-    //     // iToken config
-    //     iTokenAddress: "0xcF6E61fE1cB37e83cB590eAeE57D660089748077",
-    //     iTokenUnderlyingAddress: "0x8f1f15DCf4c70873fAF1707973f6029DEc4164b3",
-    //     iTokenName: "Liqee tXTZ",
-    //     iTokenSymbol: "qtXTZ",
-    //     reserveRatio: "0.2",
-    //     flashloanFeeRatio: "0.0004",
-    //     protocolFeeRatio: "0.3",
-    //     // controller config
-    //     collateralFactor: "0.75",
-    //     borrowFactor: "1",
-    //     supplyCapacity: "500000",
-    //     borrowCapacity: "0",
-    //     distributionFactor: "1",
-    //     // interest model config
-    //     interestModelType: "nonStableInterestModel",
-    //     // asset price swing
-    //     priceSwing: "0.1",
-    //   },
     //   "reth": {
     //     // iToken config
-    //     iTokenAddress: "0x7E3b8eB001396334DA14d4bb209b0dA77725939d",
-    //     iTokenUnderlyingAddress: "0xa7a0a9fda65cd786b3dc718616cee25afb110544",
+    //     iTokenAddress: "0x983E0df5CCCef64fCaa54F99b0945bcCf154EE80",
+    //     iTokenUnderlyingAddress: "0x9559Aaa82d9649C7A7b220E7c461d2E74c9a3593",
     //     iTokenName: "Liqee rETH",
     //     iTokenSymbol: "qrETH",
     //     reserveRatio: "0.2",
@@ -326,10 +57,10 @@
     //     // asset price swing
     //     priceSwing: "0.1",
     //   },
-    //   "eth_token": {
+    //   "eth": {
     //     // iToken config
-    //     iTokenAddress: "0x88131dd9f6A78d3d23aBcF4960D91913d2dC2307",
-    //     iTokenUnderlyingAddress: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+    //     iTokenAddress: "0x9C02b8409a2CD04DFDA7b824235625f9C7DFb0E2",
+    //     iTokenUnderlyingAddress: "0x000000000000000000000000000000000000000000000000",
     //     iTokenName: "Liqee ETH",
     //     iTokenSymbol: "qETH",
     //     reserveRatio: "0.2",
@@ -348,26 +79,26 @@
     //   },
     //   "usx_imsd": {
     //     // MSD cofig
-    //     msdAddress: "0xB5102CeE1528Ce2C760893034A4603663495fD72",
+    //     msdAddress: "0x0a5E677a6A24b2F1A2Bf4F3bFfC443231d2fDEc8",
     //     msdTokenName: "dForce USD",
     //     msdTokenSymbol: "USX",
     //     decimals: 18,
     //     // iMToken config
-    //     iMTokenAddress: "0xee0D3450b577743Eee2793C0Ec6d59361eB9a454",
+    //     iMTokenAddress: "0x4c3F88A792325aD51d8c446e1815DA10dA3D184c",
     //     iMTokenName: "Liqee USD",
     //     iMTokenSymbol: "qMUSX",
     //     // controller config
-    //     collateralFactor: "0.8",
+    //     collateralFactor: "0",
     //     borrowFactor: "1",
     //     supplyCapacity: "0",
     //     borrowCapacity: "3000000",
     //     distributionFactor: "1",
-    //     borrowAPY: 1.00,
+    //     borrowAPY: 1.03,
     //   },
     //   "usx_iToken": {
     //     // iToken config
-    //     iTokenAddress: "0x450E09a303AA4bcc518b5F74Dd00433bd9555A77",
-    //     iTokenUnderlyingAddress: "0xB5102CeE1528Ce2C760893034A4603663495fD72",
+    //     iTokenAddress: "0xA5d65E3bD7411D409EC2CCFa30C6511bA8a99D2B",
+    //     iTokenUnderlyingAddress: "0x0a5E677a6A24b2F1A2Bf4F3bFfC443231d2fDEc8",
     //     iTokenName: "Liqee USD",
     //     iTokenSymbol: "qUSX",
     //     flashloanFeeRatio: "0.0004",
@@ -376,13 +107,324 @@
     //     // controller config
     //     collateralFactor: "0.8",
     //     borrowFactor: "1",
-    //     supplyCapacity: "10000000",
-    //     borrowCapacity: "10000000",
+    //     supplyCapacity: "5000000",
+    //     borrowCapacity: "5000000",
     //     distributionFactor: "1",
+    //     // interest model config
+    //     interestModelType: "stableInterestModelAddress",
     //     // asset price swing
     //     priceSwing: "0.001",
     //   },
     // };
+
+    // // BSC mainnet Config
+    const oracleAddress = "0x7DC17576200590C4d0D8d46843c41f324da2046C";
+    let blocksPerYear = 10512000;
+
+    // TODO:
+    const proxyAdminAddress = "0xD5b837a41A0d664ec28aA55B69B352944F741EFa";
+    const pauseGuardianAddress = "0x2929F07fF145a21b6784fE923b24F3ED38C3a5c3";
+    let controllerImplAddress = "0x61206650bb0151f8EE8C278736c59B34BE5463fB";
+    let controllerProxyAddress = "0x6d290f45A280A688Ff58d095de480364069af110";
+    let msdControllerImplAddress = "0x5b3b6ff84f6693ffc3797f4ec4b764dea1c33cfb";
+    let msdControllerProxyAddress = "0x4601d9c8def18c101496dec0a4864e8751295bee";
+    let isNewMSDController = false;
+    let rewardImplAddress = "0x19CD8bE684A995e10Eaf1e8Edba4fea14f934EaF";
+    let rewardProxyAddress = "0xAa272a00e0d6F763AcC8Fe6DdEdf2684A122B215";
+    let nonStableInterestModelAddress = "0x860b3995130e23f03218f5dBB97742c51B0d7b16";
+    let stableInterestModelAddress = "0xB87fcf83C799E888725520e3BdE9b907a315BF42";
+    let fixedInterestModelAddress = "0x0BCb6Be12022c1881031F86C502daA49909b74a1";
+    let msdImplementationAddress = "0xac2428D0FB0a8516Fc30e6a0bc19b098Be5F9DfF";
+    let iTokenImplementationAddress = "0x255d14997E9669eA371e6079288AF9c5E5621Fc8";
+    let iETHImplementationAddress = "0x254AB79185bABCe0C1416FcC6d4b66675946EC9d";
+    let iMSDImplementationAddress = "0x39D3C737ee4bCcAf0264c0cf7076712505CBDc92";
+    let lendingDataImplAddress = "0x99A1B18c3b244a4863d1d032F96B0C3d3ab9cCD8";
+    let lendingDataProxyAddress = "0x52682dB111e56e57f7362C9A7B683B3542Ff46bA";
+
+    // let toDeployiTokens = ["atom", "ratom", "fil", "tfil", "dot", "rdot", "eth_token", "reth", "xtz", "txtz", "usx_iToken"];
+    // let toDeployMSDTokens = ["usx_imsd"];
+    let toDeployiTokens = ["eth", "rbnb"];
+    let toDeployMSDTokens = [];
+    let assetsConfig = {
+      "closeFactor": "0.5",
+      "liquidationIncentive": "1.1",
+      "eth": {
+        // iToken config
+        iTokenAddress: "0x5aF1b6cA84693Cc8E733C8273Ba260095B3D05CA",
+        iTokenUnderlyingAddress: "0x0000000000000000000000000000000000000000",
+        iTokenName: "Liqee BNB",
+        iTokenSymbol: "qBNB",
+        reserveRatio: "0.2",
+        flashloanFeeRatio: "0.0004",
+        protocolFeeRatio: "0.3",
+        // controller config
+        collateralFactor: "0.8",
+        borrowFactor: "1",
+        supplyCapacity: "300000",
+        borrowCapacity: "300000",
+        distributionFactor: "1",
+        // interest model config
+        interestModelType: "nonStableInterestModel",
+        // asset price swing
+        priceSwing: "0.1",
+      },
+      "rbnb": {
+        // iToken config
+        iTokenAddress: "0x9A05Eed908D0C4c2A6bd860027C2a4BbB1deeBd8",
+        iTokenUnderlyingAddress: "0xF027E525D491ef6ffCC478555FBb3CFabB3406a6",
+        iTokenName: "Liqee rBNB",
+        iTokenSymbol: "qrBNB",
+        reserveRatio: "0.2",
+        flashloanFeeRatio: "0.0004",
+        protocolFeeRatio: "0.3",
+        // controller config
+        collateralFactor: "0.7",
+        borrowFactor: "1",
+        supplyCapacity: "300000",
+        borrowCapacity: "0",
+        distributionFactor: "1",
+        // interest model config
+        interestModelType: "nonStableInterestModel",
+        // asset price swing
+        priceSwing: "0.1",
+      },
+      "atom": {
+        // iToken config
+        iTokenAddress: "0xAdCF9619C404de591766B33e696c737ebe341A87",
+        iTokenUnderlyingAddress: "0x0Eb3a705fc54725037CC9e008bDede697f62F335",
+        iTokenName: "Liqee ATOM",
+        iTokenSymbol: "qATOM",
+        reserveRatio: "0.2",
+        flashloanFeeRatio: "0.0004",
+        protocolFeeRatio: "0.3",
+        // controller config
+        collateralFactor: "0.7",
+        borrowFactor: "1",
+        supplyCapacity: "1000000",
+        borrowCapacity: "1000000",
+        distributionFactor: "1",
+        // interest model config
+        interestModelType: "nonStableInterestModel",
+        // asset price swing
+        priceSwing: "0.1",
+      },
+      "ratom": {
+        // iToken config
+        iTokenAddress: "0x4E673bed356912077c718CBAB286BC135fAA5FB6",
+        iTokenUnderlyingAddress: "0x1e5f6d5355AE5f1C5C687D3041c55F0aEEc57EAb",
+        iTokenName: "Liqee rATOM",
+        iTokenSymbol: "qrATOM",
+        reserveRatio: "0.2",
+        flashloanFeeRatio: "0.0004",
+        protocolFeeRatio: "0.3",
+        // controller config
+        collateralFactor: "0.7",
+        borrowFactor: "1",
+        supplyCapacity: "1000000",
+        borrowCapacity: "0",
+        distributionFactor: "1",
+        // interest model config
+        interestModelType: "nonStableInterestModel",
+        // asset price swing
+        priceSwing: "0.1",
+      },
+      "dot": {
+        // iToken config
+        iTokenAddress: "0xF51422c47c6C3e40CFCA4a7b04232aeDb7f49948",
+        iTokenUnderlyingAddress: "0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402",
+        iTokenName: "Liqee DOT",
+        iTokenSymbol: "qDOT",
+        reserveRatio: "0.2",
+        flashloanFeeRatio: "0.0004",
+        protocolFeeRatio: "0.3",
+        // controller config
+        collateralFactor: "0.7",
+        borrowFactor: "1",
+        supplyCapacity: "800000",
+        borrowCapacity: "800000",
+        distributionFactor: "1",
+        // interest model config
+        interestModelType: "nonStableInterestModel",
+        // asset price swing
+        priceSwing: "0.1",
+      },
+      "rdot": {
+        // iToken config
+        iTokenAddress: "0x09d0D2C90d09dD817559425479a573faA354c9d2",
+        iTokenUnderlyingAddress: "0x1dab2a526c8ac1ddea86838a7b968626988d33de",
+        iTokenName: "Liqee rDOT",
+        iTokenSymbol: "qrDOT",
+        reserveRatio: "0.2",
+        flashloanFeeRatio: "0.0004",
+        protocolFeeRatio: "0.3",
+        // controller config
+        collateralFactor: "0.7",
+        borrowFactor: "1",
+        supplyCapacity: "500000",
+        borrowCapacity: "0",
+        distributionFactor: "1",
+        // interest model config
+        interestModelType: "nonStableInterestModel",
+        // asset price swing
+        priceSwing: "0.1",
+      },
+      "fil": {
+        // iToken config
+        iTokenAddress: "0x89934cF95c8Ffa4D748B3a9963faD13dBA52C52F",
+        iTokenUnderlyingAddress: "0x0D8Ce2A99Bb6e3B7Db580eD848240e4a0F9aE153",
+        iTokenName: "Liqee FIL",
+        iTokenSymbol: "qFIL",
+        reserveRatio: "0.2",
+        flashloanFeeRatio: "0.0004",
+        protocolFeeRatio: "0.3",
+        // controller config
+        collateralFactor: "0.7",
+        borrowFactor: "1",
+        supplyCapacity: "100000",
+        borrowCapacity: "100000",
+        distributionFactor: "1",
+        // interest model config
+        interestModelType: "nonStableInterestModel",
+        // asset price swing
+        priceSwing: "0.1",
+      },
+      "tfil": {
+        // iToken config
+        iTokenAddress: "0x10937c33BB015Aa52EF39E2A5CAd0Da285bb39ab",
+        iTokenUnderlyingAddress: "0x7829a9810BB84b0e6827f21c81396125d76a2EAB",
+        iTokenName: "Liqee tFIL",
+        iTokenSymbol: "qtFIL",
+        reserveRatio: "0.2",
+        flashloanFeeRatio: "0.0004",
+        protocolFeeRatio: "0.3",
+        // controller config
+        collateralFactor: "0.75",
+        borrowFactor: "1",
+        supplyCapacity: "100000",
+        borrowCapacity: "0",
+        distributionFactor: "1",
+        // interest model config
+        interestModelType: "nonStableInterestModel",
+        // asset price swing
+        priceSwing: "0.1",
+      },
+      "xtz": {
+        // iToken config
+        iTokenAddress: "0xD95e75Bf11FF705ebD0bBc088892483015bB40fb",
+        iTokenUnderlyingAddress: "0x16939ef78684453bfDFb47825F8a5F714f12623a",
+        iTokenName: "Liqee XTZ",
+        iTokenSymbol: "qXTZ",
+        reserveRatio: "0.2",
+        flashloanFeeRatio: "0.0004",
+        protocolFeeRatio: "0.3",
+        // controller config
+        collateralFactor: "0.7",
+        borrowFactor: "1",
+        supplyCapacity: "500000",
+        borrowCapacity: "500000",
+        distributionFactor: "1",
+        // interest model config
+        interestModelType: "nonStableInterestModel",
+        // asset price swing
+        priceSwing: "0.1",
+      },
+      "txtz": {
+        // iToken config
+        iTokenAddress: "0xcF6E61fE1cB37e83cB590eAeE57D660089748077",
+        iTokenUnderlyingAddress: "0x8f1f15DCf4c70873fAF1707973f6029DEc4164b3",
+        iTokenName: "Liqee tXTZ",
+        iTokenSymbol: "qtXTZ",
+        reserveRatio: "0.2",
+        flashloanFeeRatio: "0.0004",
+        protocolFeeRatio: "0.3",
+        // controller config
+        collateralFactor: "0.75",
+        borrowFactor: "1",
+        supplyCapacity: "500000",
+        borrowCapacity: "0",
+        distributionFactor: "1",
+        // interest model config
+        interestModelType: "nonStableInterestModel",
+        // asset price swing
+        priceSwing: "0.1",
+      },
+      "reth": {
+        // iToken config
+        iTokenAddress: "0x7E3b8eB001396334DA14d4bb209b0dA77725939d",
+        iTokenUnderlyingAddress: "0xa7a0a9fda65cd786b3dc718616cee25afb110544",
+        iTokenName: "Liqee rETH",
+        iTokenSymbol: "qrETH",
+        reserveRatio: "0.2",
+        flashloanFeeRatio: "0.0004",
+        protocolFeeRatio: "0.3",
+        // controller config
+        collateralFactor: "0.7",
+        borrowFactor: "1",
+        supplyCapacity: "5000",
+        borrowCapacity: "0",
+        distributionFactor: "1",
+        // interest model config
+        interestModelType: "nonStableInterestModel",
+        // asset price swing
+        priceSwing: "0.1",
+      },
+      "eth_token": {
+        // iToken config
+        iTokenAddress: "0x88131dd9f6A78d3d23aBcF4960D91913d2dC2307",
+        iTokenUnderlyingAddress: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+        iTokenName: "Liqee ETH",
+        iTokenSymbol: "qETH",
+        reserveRatio: "0.2",
+        flashloanFeeRatio: "0.0004",
+        protocolFeeRatio: "0.3",
+        // controller config
+        collateralFactor: "0.8",
+        borrowFactor: "1",
+        supplyCapacity: "5000",
+        borrowCapacity: "5000",
+        distributionFactor: "1",
+        // interest model config
+        interestModelType: "nonStableInterestModel",
+        // asset price swing
+        priceSwing: "0.1",
+      },
+      "usx_imsd": {
+        // MSD cofig
+        msdAddress: "0xB5102CeE1528Ce2C760893034A4603663495fD72",
+        msdTokenName: "dForce USD",
+        msdTokenSymbol: "USX",
+        decimals: 18,
+        // iMToken config
+        iMTokenAddress: "0xee0D3450b577743Eee2793C0Ec6d59361eB9a454",
+        iMTokenName: "Liqee USD",
+        iMTokenSymbol: "qMUSX",
+        // controller config
+        collateralFactor: "0.8",
+        borrowFactor: "1",
+        supplyCapacity: "0",
+        borrowCapacity: "3000000",
+        distributionFactor: "1",
+        borrowAPY: 1.00,
+      },
+      "usx_iToken": {
+        // iToken config
+        iTokenAddress: "0x450E09a303AA4bcc518b5F74Dd00433bd9555A77",
+        iTokenUnderlyingAddress: "0xB5102CeE1528Ce2C760893034A4603663495fD72",
+        iTokenName: "Liqee USD",
+        iTokenSymbol: "qUSX",
+        flashloanFeeRatio: "0.0004",
+        protocolFeeRatio: "0.3",
+        reserveRatio: "0.2",
+        // controller config
+        collateralFactor: "0.8",
+        borrowFactor: "1",
+        supplyCapacity: "10000000",
+        borrowCapacity: "10000000",
+        distributionFactor: "1",
+        // asset price swing
+        priceSwing: "0.001",
+      },
+    };
 
     // 0.0 Deploys proxy admin.
     const proxyAdminName = "ProxyAdmin";
